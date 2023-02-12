@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @unique @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  email     String    @unique
+  password  String
+  name      String
+  posts     Post[]
+  PostLog   PostLog[]
+}
+
+type PostData {
+  title        String
+  slug         String
+  heroImage    String
+  description1 String
+  description2 String
+  content1     String
+  offerImage   String
+  content2     String
+  offerImage2  String
+  metaTitle    String
+  metaDesc     String
+  metaKeywords String
+}
+
+// this has the saved post which is not published
+model Post {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  published Boolean  @default(false)
+  post      PostData
+  author    User     @relation(fields: [authorId], references: [userId])
+  authorId  String
+}
+
+// the last log of this is the current post
+model PostLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  post      PostData
+  author    User     @relation(fields: [authorId], references: [userId])
+  authorId  String
+}

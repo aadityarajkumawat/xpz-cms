@@ -103,8 +103,44 @@ app.post("/update-post/:postId", async (req, res) => {
   }
 });
 
-app.get("/get-post", async (req, res) => {
-  const posts = await prisma.post.findMany();
+app.get("/get-post/:postId", async (req, res) => {
+  const { postId } = req.params;
+
+  if (!postId) {
+    return res.status(400).json("Post Id is required");
+  }
+
+  try {
+    const post = await prisma.post.findUnique({ where: { postId } });
+
+    if (!post) {
+      return res.status(404).json("Post not found");
+    }
+
+    return res.status(200).json(post);
+  } catch (error) {
+    return res.status(500).json("Internal Server Error");
+  }
+});
+
+app.post("/all-posts/:authorId", async (req, res) => {
+  const { authorId } = req.body;
+
+  if (!authorId) {
+    return res.status(400).json("Author Id is required");
+  }
+
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId,
+      },
+    });
+
+    return res.status(200).json(posts);
+  } catch (error) {
+    return res.status(500).json("Internal Server Error");
+  }
 });
 
 app.listen(3001, () => {
